@@ -1,0 +1,356 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOCTORLY - Modern Healthcare Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --medical-primary: #0891b2;
+            --medical-secondary: #0e7490;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(152deg, #f0fdfa 0%, #ecfeff 100%);
+        }
+
+        .medical-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px rgba(8, 145, 178, 0.1);
+            border: 1px solid rgba(8, 145, 178, 0.1);
+        }
+
+        .video-container {
+            border-radius: 1rem;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 4px 24px rgba(8, 145, 178, 0.08);
+        }
+
+        .ai-response {
+            background: linear-gradient(145deg, #f0fdfa 0%, #ecfeff 100%);
+            border-left: 4px solid var(--medical-primary);
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(8, 145, 178, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-12">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-[var(--medical-primary)] rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-slate-800">DOCTORLY</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="vital-card medical-card p-3">
+                    <span class="text-sm">❤️ Heart Rate:</span>
+                    <span data-vital="heart" class="font-bold">80</span> bpm
+                </div>
+                <div class="vital-card medical-card p-3">
+                    <span class="text-sm">🩺 Blood Pressure:</span>
+                    <span data-vital="bp" class="font-bold">120/80</span> mmHg
+                </div>
+                <button onclick="showDoctorSelection()" 
+                        class="medical-card px-6 py-2.5 bg-[var(--medical-primary)] text-white hover:bg-[var(--medical-secondary)] transition-colors">
+                    👨⚕️ Select Doctor
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Video Consultation -->
+            <div class="medical-card p-6">
+                <h2 class="text-xl font-semibold mb-6 text-slate-800">🩺 Video Consultation</h2>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="video-container relative">
+                        <video id="local-video" class="w-full h-64 object-cover rounded-xl" autoplay muted></video>
+                        <div class="absolute bottom-2 left-2 bg-white/80 px-3 py-1 rounded-full text-sm">You</div>
+                    </div>
+                    <div class="video-container relative">
+                        <video id="remote-video" class="w-full h-64 object-cover rounded-xl" autoplay></video>
+                        <div class="absolute bottom-2 left-2 bg-white/80 px-3 py-1 rounded-full text-sm">Doctor</div>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="startConsultation()" 
+                            class="flex-1 medical-card px-6 py-3 bg-emerald-500 text-white hover:bg-emerald-600 transition-colors">
+                        ▶️ Start Session
+                    </button>
+                    <button onclick="endConsultation()" 
+                            class="flex-1 medical-card px-6 py-3 bg-rose-500 text-white hover:bg-rose-600 transition-colors">
+                        ⏹️ End Session
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Medical Assistant -->
+            <div class="medical-card p-6">
+                <h2 class="text-xl font-semibold mb-6 text-slate-800">🤖 AI Health Assistant</h2>
+                <div id="chat-log" class="h-64 overflow-y-auto mb-6 space-y-3 pr-2">
+                    <div class="ai-response p-4 rounded-lg">
+                        <p class="text-[var(--medical-primary)] font-medium">DR. AI:</p>
+                        <p class="text-slate-600">How can I assist you today?</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <input type="text" id="chat-input" 
+                           class="flex-1 medical-card px-4 py-2" 
+                           placeholder="Type your message...">
+                    <button onclick="sendMessage()" 
+                            class="medical-card px-4 py-2 bg-[var(--medical-primary)] text-white hover:bg-[var(--medical-secondary)]">
+                        Send
+                    </button>
+                </div>
+                <div class="flex gap-3 mt-4">
+                    <button onclick="startVoiceRecognition()" 
+                            class="flex-1 medical-card px-6 py-3 bg-[var(--medical-primary)] text-white hover:bg-[var(--medical-secondary)] transition-colors">
+                        🎤 Voice Command
+                    </button>
+                    <button onclick="analyzeSymptoms()" 
+                            class="medical-card px-6 py-3 bg-indigo-500 text-white hover:bg-indigo-600 transition-colors">
+                        📋 Symptom Check
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Selection Modal -->
+        <div id="doctor-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+            <div class="medical-card p-6 w-full max-w-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold">Select Your Doctor</h3>
+                    <button onclick="hideDoctorSelection()" 
+                            class="medical-card p-2 hover:bg-slate-50 rounded-lg">
+                        ✕
+                    </button>
+                </div>
+                <div id="doctor-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Doctor cards will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // PeerJS Configuration
+        let peer, localStream, remoteStream, currentCall;
+
+        function initPeer() {
+            peer = new Peer({
+                config: {'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'turn:numb.viagenie.ca', username: 'webrtc@live.com', credential: 'muazkh' }
+                ]}
+            });
+
+            peer.on('open', id => {
+                console.log('Your Peer ID:', id);
+                localStorage.setItem('peerId', id);
+            });
+
+            peer.on('call', async call => {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    call.answer(localStream);
+                    setupCall(call);
+                    showNotification('Incoming call answered!', 'success');
+                } catch (error) {
+                    showNotification(`Error: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        // Video Consultation Functions
+        async function startConsultation() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('local-video').srcObject = localStream;
+                
+                const patientId = prompt('Enter Patient/Doctor ID:');
+                if (!patientId) return;
+
+                currentCall = peer.call(patientId, localStream);
+                setupCall(currentCall);
+                showNotification('Connecting...', 'info');
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function endConsultation() {
+            if (currentCall) currentCall.close();
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            document.querySelectorAll('video').forEach(video => video.srcObject = null);
+            showNotification('Session ended', 'success');
+        }
+
+        function setupCall(call) {
+            call.on('stream', stream => {
+                document.getElementById('remote-video').srcObject = stream;
+                showNotification('Connected!', 'success');
+            });
+        }
+
+        // Doctor Selection
+        const doctors = [
+            { id: 'doc1', name: "Dr.vital aditya", specialty: "Cardiology", rating: 4.9 },
+            { id: 'doc2', name: "Dr. sai saketh", specialty: "Neurology", rating: 4.8 },
+            { id: 'doc3', name: "Dr. varshini", specialty: "Pediatrics", rating: 4.7 }
+        ];
+
+        function showDoctorSelection() {
+            const modal = document.getElementById('doctor-modal');
+            const list = document.getElementById('doctor-list');
+            
+            list.innerHTML = doctors.map(doctor => `
+                <div class="medical-card p-4 cursor-pointer transition-all hover:border-[var(--medical-primary)]">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">${doctor.name}</h4>
+                        <div class="flex items-center text-amber-400">
+                            ★ ${doctor.rating}
+                        </div>
+                    </div>
+                    <div class="text-sm text-[var(--medical-primary)]">${doctor.specialty}</div>
+                    <button onclick="connectToDoctor('${doctor.id}')" 
+                            class="mt-3 w-full medical-card px-4 py-2 text-sm bg-[var(--medical-primary)] text-white hover:bg-[var(--medical-secondary)]">
+                        Connect
+                    </button>
+                </div>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        async function connectToDoctor(doctorId) {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('local-video').srcObject = localStream;
+                currentCall = peer.call(doctorId, localStream);
+                setupCall(currentCall);
+                hideDoctorSelection();
+            } catch (error) {
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function hideDoctorSelection() {
+            document.getElementById('doctor-modal').classList.add('hidden');
+        }
+
+        // AI Medical Assistant
+        const medicalKB = {
+            headache: "Recommend rest and hydration. Monitor for worsening symptoms.",
+            fever: "Suggest antipyretics if temperature exceeds 38.5°C. Seek help if persists beyond 3 days.",
+            "chest pain": "Emergency! Seek immediate medical attention!",
+            dizziness: "Recommend sitting down and monitoring blood pressure."
+        };
+
+        function analyzeSymptoms() {
+            const symptoms = prompt("Describe your symptoms:");
+            if (symptoms) processQuery(symptoms.toLowerCase());
+        }
+
+        function processQuery(query) {
+            const response = medicalKB[query] || `Your concern about "${query}" has been noted.`;
+            addMessage(`DR. AI: ${response}`);
+            speak(response);
+        }
+
+        // Chat Functions
+        function addMessage(message) {
+            const chatLog = document.getElementById('chat-log');
+            const isAI = message.startsWith('DR. AI:');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `ai-response p-4 rounded-lg ${isAI ? '' : 'user-message'}`;
+            messageDiv.innerHTML = `
+                <p class="${isAI ? 'text-[var(--medical-primary)]' : 'text-slate-800'} font-medium">
+                    ${isAI ? 'DR. AI:' : 'You:'}
+                </p>
+                <p class="text-slate-600">${message.split(': ')[1]}</p>
+            `;
+            chatLog.appendChild(messageDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            if (input.value.trim()) {
+                addMessage(`You: ${input.value}`);
+                processQuery(input.value);
+                input.value = '';
+            }
+        }
+
+        // Voice Recognition
+        function startVoiceRecognition() {
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.lang = 'en-US';
+                
+                recognition.onresult = event => {
+                    const transcript = event.results[0][0].transcript;
+                    addMessage(`You: ${transcript}`);
+                    processQuery(transcript);
+                };
+                
+                recognition.start();
+            } else {
+                showNotification("Voice commands not supported", 'warning');
+            }
+        }
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+
+        // Vitals Simulation
+        function simulateVitals() {
+            document.querySelectorAll('[data-vital]').forEach(element => {
+                const current = parseInt(element.textContent.match(/\d+/)[0]);
+                const change = Math.floor(Math.random() * 5 - 2);
+                element.textContent = element.textContent.replace(/\d+/, Math.max(60, Math.min(current + change, 120)));
+            });
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed bottom-4 right-4 medical-card p-4 rounded-lg ${
+                type === 'error' ? 'bg-red-500/90' :
+                type === 'success' ? 'bg-green-500/90' :
+                'bg-blue-500/90'
+            } text-white`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init({ duration: 1000 });
+            initPeer();
+            setInterval(simulateVitals, 2000);
+        });
+    </script>
+</body>
+</html>
